@@ -1,26 +1,30 @@
 var http = require('http'),
-    async = require('async');
+    async = require('async'),
+    fs = require('fs');
 
 async.waterfall([
-    function(callback) {
+    function (callback) {
+        fs.readFile(process.argv[2], function doneReading(err, fileContents) {
+            var body = fileContents.toString();
+            callback(null, body);
+        })
+    },
+
+    function (body, callback) {
+        var url = body;
         var body = '';
-        http.get(process.argv[2], function(response) {
-            response.on('data', function(chunk) {
+        http.get(url, function (res) {
+            res.on('data', function (chunk) {
                 body += chunk.toString();
             });
-            response.on('end', function() {
+            res.on('end', function () {
                 callback(null, body);
             });
-        }).on('error', function(err) {
+        }).on('error', function (err) {
             callback(err);
         });
-    },
-    
-    function(body, callback) {
-        var url = JSON.parse(body).url;
-        var body = '';
-        http.get(url, function(res) {
-            res.on('data', f
-        })
     }
-])
+], function (err, result) {
+    if (err) return console.error(result);
+    console.log(result);
+});
